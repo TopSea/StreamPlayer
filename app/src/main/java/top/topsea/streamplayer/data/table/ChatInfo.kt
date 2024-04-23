@@ -12,30 +12,27 @@ import androidx.room.Query
 import androidx.room.TypeConverters
 import kotlinx.coroutines.flow.Flow
 import top.topsea.streamplayer.data.converter.DateConverter
+import top.topsea.streamplayer.data.converter.MessageConverter
 import java.sql.Date
 
 
 // 信息类型
 enum class MessageType{
-    TEXT {
-        override lateinit var content: String
-    },
-    AUDIO {
-        override lateinit var content: String
-    },
-    VIDEO {
-        override lateinit var content: String
-    },
-    LINK {
-        override lateinit var content: String
-    };
-
-    abstract var content: String
+    TEXT,
+    AUDIO,
+    VIDEO,
+    LINK
 }
+
+class ChatMessage(
+    val type: MessageType,
+    val content: String,
+)
+
 
 @Keep
 @Immutable
-@TypeConverters(DateConverter::class)
+@TypeConverters(MessageConverter::class, DateConverter::class)
 @Entity
 data class ChatInfo(
     @PrimaryKey
@@ -45,7 +42,7 @@ data class ChatInfo(
     @ColumnInfo(name = "to_who")
     val toWho: String,
     @ColumnInfo(name = "message_content")
-    val messageContent: MessageType,
+    val messageContent: ChatMessage,
     @ColumnInfo(name = "send_time")
     val sendTime: Date,
 

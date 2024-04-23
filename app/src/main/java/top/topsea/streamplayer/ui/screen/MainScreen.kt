@@ -44,6 +44,7 @@ import org.json.JSONArray
 import top.topsea.streamplayer.R
 import top.topsea.streamplayer.data.state.ChatUIState
 import top.topsea.streamplayer.data.table.ChatInfo
+import top.topsea.streamplayer.data.table.ChatMessage
 import top.topsea.streamplayer.data.table.MessageType
 import top.topsea.streamplayer.data.viewmodel.ChatEvent
 import top.topsea.streamplayer.data.viewmodel.ChatInfoViewModel
@@ -78,8 +79,10 @@ fun MainScreen(
             UserInput(
                 onMessageSent = { content ->
                                 // TODO 保存和发送信息
-                    val newMessage = MessageType.TEXT
-                    newMessage.content = content
+                    val newMessage = ChatMessage(
+                        MessageType.TEXT,
+                        content
+                    )
                     val newChat = ChatInfo(
                         id = null,
                         fromWho = "me",

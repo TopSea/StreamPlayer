@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,7 +45,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import top.topsea.streamplayer.R
 import top.topsea.streamplayer.data.table.ChatInfo
@@ -157,194 +160,9 @@ fun ChatMessages(
     }
 }
 
-@Composable
-fun DroidMessageItem(
-    onAuthorClick: (String) -> Unit,
-    msg: ChatInfo,
-    isUserMe: Boolean,
-    lastMessageFromDroid: Boolean
-) {
-    val borderColor = if (isUserMe) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.tertiary
-    }
+private val ChatBubbleShape = RoundedCornerShape(4.dp, 10.dp, 10.dp, 10.dp)
 
-    val spaceBetweenAuthors =
-        if (lastMessageFromDroid) Modifier.padding(top = 8.dp) else Modifier.padding(top = 16.dp)
-    Row(modifier = spaceBetweenAuthors) {
-        if (!lastMessageFromDroid) {
-            // Avatar
-            Image(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .size(42.dp)
-                    .border(1.5.dp, borderColor, CircleShape)
-                    .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                    .clip(CircleShape)
-                    .align(Alignment.Top),
-                painter = painterResource(id = if (msg.fromWho == "me") R.drawable.baseline_person else R.drawable.baseline_android),
-                contentScale = ContentScale.Crop,
-                contentDescription = null,
-            )
-        } else {
-            // Space under avatar
-            Spacer(modifier = Modifier.width(74.dp))
-        }
-        DroidMessage(
-            msg = msg,
-            isUserMe = isUserMe,
-            lastMessageFromDroid = lastMessageFromDroid,
-            authorClicked = onAuthorClick,
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .weight(1f)
-        )
-    }
-}
-
-
-@Composable
-fun SelfMessageItem(
-    onAuthorClick: (String) -> Unit,
-    msg: ChatInfo,
-    isUserMe: Boolean,
-    lastMessageFromMe: Boolean
-) {
-    val borderColor = if (isUserMe) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.tertiary
-    }
-
-    val spaceBetweenAuthors =
-        if (lastMessageFromMe) Modifier.padding(top = 8.dp) else Modifier.padding(top = 16.dp)
-    Row(modifier = spaceBetweenAuthors) {
-        SelfMessage(
-            msg = msg,
-            isUserMe = isUserMe,
-            isLastMessageByAuthor = lastMessageFromMe,
-            authorClicked = onAuthorClick,
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .weight(1f)
-        )
-        if (!lastMessageFromMe) {
-            // Avatar
-            Image(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .size(42.dp)
-                    .border(1.5.dp, borderColor, CircleShape)
-                    .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                    .clip(CircleShape)
-                    .align(Alignment.Top),
-                painter = painterResource(id = if (msg.fromWho == "me") R.drawable.baseline_person else R.drawable.baseline_android),
-                contentScale = ContentScale.Crop,
-                contentDescription = null,
-            )
-        } else {
-            // Space under avatar
-            Spacer(modifier = Modifier.width(74.dp))
-        }
-    }
-}
-
-@Composable
-fun DroidMessage(
-    msg: ChatInfo,
-    isUserMe: Boolean,
-    lastMessageFromDroid: Boolean,
-    authorClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        if (!lastMessageFromDroid) {
-            DroidTimestamp(msg)
-        }
-        ChatItemBubble(msg, isUserMe, authorClicked = authorClicked)
-
-//        if (lastMessageFromDroid) {
-//            // Last bubble before next author
-//            Spacer(modifier = Modifier.height(8.dp))
-//        } else {
-//            // Between bubbles
-//            Spacer(modifier = Modifier.height(4.dp))
-//        }
-    }
-}
-
-@Composable
-fun SelfMessage(
-    msg: ChatInfo,
-    isUserMe: Boolean,
-    isLastMessageByAuthor: Boolean,
-    authorClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        if (!isLastMessageByAuthor) {
-            SelfTimestamp(msg)
-        }
-        SelfChatItemBubble(msg, isUserMe, authorClicked = authorClicked)
-
-//        if (isLastMessageByAuthor) {
-//            // Last bubble before next author
-//            Spacer(modifier = Modifier.height(8.dp))
-//        } else {
-//            // Between bubbles
-//            Spacer(modifier = Modifier.height(4.dp))
-//        }
-    }
-}
-
-@Composable
-private fun DroidTimestamp(msg: ChatInfo) {
-    // Combine author and timestamp for a11y.
-    Row(modifier = Modifier.semantics(mergeDescendants = true) {}) {
-        Text(
-            text = msg.fromWho,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .alignBy(LastBaseline)
-                .paddingFrom(LastBaseline, after = 8.dp) // Space to 1st bubble
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-//        Text(
-//            text = getFormatByDate(msg.sendTime),
-//            style = MaterialTheme.typography.bodySmall,
-//            modifier = Modifier.alignBy(LastBaseline),
-//            color = MaterialTheme.colorScheme.onSurfaceVariant
-//        )
-    }
-}
-
-@Composable
-private fun SelfTimestamp(msg: ChatInfo) {
-    // Combine author and timestamp for a11y.
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-//            Text(
-//                text = getFormatByDate(msg.sendTime),
-//                style = MaterialTheme.typography.bodySmall,
-//                modifier = Modifier.alignBy(LastBaseline),
-//                color = MaterialTheme.colorScheme.onSurfaceVariant
-//            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = msg.fromWho,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .alignBy(LastBaseline)
-                    .paddingFrom(LastBaseline, after = 8.dp) // Space to 1st bubble
-            )
-        }
-    }
-}
-
-private val ChatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
-
-private val SelfChatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
+private val SelfChatBubbleShape = RoundedCornerShape(10.dp, 4.dp, 10.dp, 10.dp)
 
 @Composable
 fun DayHeader(dayString: String) {
@@ -366,7 +184,7 @@ fun DayHeader(dayString: String) {
 
 @Composable
 private fun RowScope.DayHeaderLine() {
-    Divider(
+    HorizontalDivider(
         modifier = Modifier
             .weight(1f)
             .align(Alignment.CenterVertically),
@@ -445,8 +263,11 @@ fun ClickableMessage(
 
     ClickableText(
         text = styledMessage,
-        style = MaterialTheme.typography.bodyLarge.copy(color = LocalContentColor.current),
-        modifier = Modifier.padding(16.dp),
+        style = TextStyle(
+            color = LocalContentColor.current,
+            fontSize = 12.sp,
+        ),
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
         onClick = {
             styledMessage
                 .getStringAnnotations(start = it, end = it)
