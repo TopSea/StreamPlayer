@@ -1,6 +1,7 @@
 package top.topsea.streamplayer.data
 
 import android.content.Context
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.room.Room
 import com.tencent.mmkv.MMKV
 import dagger.Module
@@ -29,6 +30,12 @@ object AppInjectionModule {
         )
 //            .createFromAsset("AppDatabase.db")
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideExoPlayer(@ApplicationContext appContext: Context): ExoPlayer {
+        return ExoPlayer.Builder(appContext).build()
     }
 
     @Provides

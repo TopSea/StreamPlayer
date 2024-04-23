@@ -124,6 +124,35 @@ fun DroidMessage(
     }
 }
 
+private val ChatBubbleShape = RoundedCornerShape(4.dp, 10.dp, 10.dp, 10.dp)
+
+@Composable
+fun ChatItemBubble(
+    chatMessage: ChatInfo,
+    isUserMe: Boolean,
+    authorClicked: (String) -> Unit
+) {
+
+    val backgroundBubbleColor = if (isUserMe) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    Column {
+        Surface(
+            color = backgroundBubbleColor,
+            shape = ChatBubbleShape
+        ) {
+            ClickableMessage(
+                chatMessage = chatMessage,
+                isUserMe = isUserMe,
+                authorClicked = authorClicked
+            )
+        }
+    }
+}
+
 @Composable
 private fun DroidTimestamp(msg: ChatInfo) {
     val context = LocalContext.current

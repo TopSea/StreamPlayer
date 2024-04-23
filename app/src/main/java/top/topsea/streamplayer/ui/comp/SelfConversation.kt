@@ -1,6 +1,7 @@
 package top.topsea.streamplayer.ui.comp
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,7 +61,8 @@ fun SelfMessageItem(
     onAuthorClick: (String) -> Unit,
     msg: ChatInfo,
     isUserMe: Boolean,
-    lastMessageFromMe: Boolean
+    lastMessageFromMe: Boolean,
+    onPlaying: () -> Unit
 ) {
     val borderColor = if (isUserMe) {
         MaterialTheme.colorScheme.primary
@@ -78,7 +80,8 @@ fun SelfMessageItem(
             authorClicked = onAuthorClick,
             modifier = Modifier
                 .padding(start = 16.dp)
-                .weight(1f)
+                .weight(1f),
+            onPlaying
         )
         if (!lastMessageFromMe) {
             // Avatar
@@ -107,13 +110,14 @@ fun SelfMessage(
     isUserMe: Boolean,
     isLastMessageByAuthor: Boolean,
     authorClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onPlaying: () -> Unit
 ) {
     Column(modifier = modifier) {
         if (!isLastMessageByAuthor) {
             SelfTimestamp(msg)
         }
-        SelfChatItemBubble(msg, isUserMe, authorClicked = authorClicked)
+        SelfChatItemBubble(msg, isUserMe, authorClicked = authorClicked, onPlaying)
 
 //        if (isLastMessageByAuthor) {
 //            // Last bubble before next author
@@ -122,6 +126,49 @@ fun SelfMessage(
 //            // Between bubbles
 //            Spacer(modifier = Modifier.height(4.dp))
 //        }
+    }
+}
+
+
+private val SelfChatBubbleShape = RoundedCornerShape(10.dp, 4.dp, 10.dp, 10.dp)
+
+@Composable
+fun SelfChatItemBubble(
+    chatMessage: ChatInfo,
+    isUserMe: Boolean,
+    authorClicked: (String) -> Unit,
+    onPlaying: () -> Unit
+) {
+
+    val backgroundBubbleColor = if (isUserMe) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // 对聊天信息的操作
+                MessageFunction(onPlaying = onPlaying)
+
+                Row(
+                    modifier = Modifier.background(
+                        color = backgroundBubbleColor,
+                        shape = SelfChatBubbleShape
+                    ),
+                ) {
+                    ClickableMessage(
+                        chatMessage = chatMessage,
+                        isUserMe = isUserMe,
+                        authorClicked = authorClicked
+                    )
+                }
+            }
+        }
     }
 }
 

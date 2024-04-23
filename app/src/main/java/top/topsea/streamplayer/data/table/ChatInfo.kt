@@ -18,9 +18,15 @@ import java.sql.Date
 
 // 信息类型
 enum class MessageType{
+    // 播放、下载、分享
     TEXT,
+    // 播放、下载、分享
     AUDIO,
+    // 打开、下载、分享
     VIDEO,
+    // 打开、下载、分享
+    IMAGE,
+    // 打开、分享
     LINK
 }
 
