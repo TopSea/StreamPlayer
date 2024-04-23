@@ -68,7 +68,8 @@ fun ChatMessages(
         }
     }
 
-    Box {
+    // 需要 Box 下拉刷新
+    Box(modifier = modifier) {
         LazyColumn(
             reverseLayout = true,
             state = scrollState,

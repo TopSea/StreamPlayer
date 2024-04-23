@@ -45,6 +45,7 @@ import top.topsea.streamplayer.R
 import top.topsea.streamplayer.data.state.ChatUIState
 import top.topsea.streamplayer.data.table.ChatInfo
 import top.topsea.streamplayer.data.table.MessageType
+import top.topsea.streamplayer.data.viewmodel.ChatEvent
 import top.topsea.streamplayer.data.viewmodel.ChatInfoViewModel
 import top.topsea.streamplayer.ui.comp.ChatMessages
 import top.topsea.streamplayer.ui.comp.UserInput
@@ -71,12 +72,24 @@ fun MainScreen(
             ChatMessages(
                 chatMessages = chatUIState.chats,
                 navigateToProfile = navigateToProfile,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 scrollState = scrollState
             )
             UserInput(
                 onMessageSent = { content ->
                                 // TODO 保存和发送信息
+                    val newMessage = MessageType.TEXT
+                    newMessage.content = content
+                    val newChat = ChatInfo(
+                        id = null,
+                        fromWho = "me",
+                        toWho = "Furina",
+                        messageContent = newMessage,
+                        sendTime = Date(System.currentTimeMillis())
+                    )
+                    chatInfoViewModel.onChatEvent(ChatEvent.AddChat(
+                        newChat
+                    ))
                 },
                 resetScroll = {
                     scope.launch {
