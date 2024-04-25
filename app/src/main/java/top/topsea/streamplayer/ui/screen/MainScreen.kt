@@ -1,7 +1,5 @@
 package top.topsea.streamplayer.ui.screen
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,7 +22,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,21 +30,19 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 import top.topsea.streamplayer.R
-import top.topsea.streamplayer.data.state.ChatUIState
 import top.topsea.streamplayer.data.table.ChatInfo
 import top.topsea.streamplayer.data.table.ChatMessage
 import top.topsea.streamplayer.data.table.MessageType
 import top.topsea.streamplayer.data.viewmodel.ChatEvent
 import top.topsea.streamplayer.data.viewmodel.ChatInfoViewModel
+import top.topsea.streamplayer.data.viewmodel.UISetsViewModel
 import top.topsea.streamplayer.ui.comp.ChatMessages
 import top.topsea.streamplayer.ui.comp.UserInput
 import java.sql.Date
@@ -62,6 +57,7 @@ fun MainScreen(
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val chatUIState by chatInfoViewModel.state.collectAsState()
+    val uiSetsViewModel: UISetsViewModel = hiltViewModel()
 
     Scaffold(
         topBar = { MainTopBar(navController) }
@@ -71,10 +67,12 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(paddingValues)) {
             ChatMessages(
-                chatMessages = chatUIState.chats,
-                navigateToProfile = navigateToProfile,
                 modifier = Modifier.fillMaxWidth().weight(1f),
-                scrollState = scrollState
+                chatMessages = chatUIState.chats,
+                uiSetsState = uiSetsViewModel.uiSetsState,
+                navigateToProfile = navigateToProfile,
+                scrollState = scrollState,
+                uiSetsEvent = uiSetsViewModel::onUISetsEvent
             )
             UserInput(
                 onMessageSent = { content ->

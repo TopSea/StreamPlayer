@@ -52,12 +52,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import top.topsea.streamplayer.R
+import top.topsea.streamplayer.data.state.UISetsState
 import top.topsea.streamplayer.data.table.ChatInfo
+import top.topsea.streamplayer.data.viewmodel.UISetsEvent
 import top.topsea.streamplayer.util.DateUtil
 
 
 @Composable
 fun SelfMessageItem(
+    uiSetsState: UISetsState,
+    uiSetsEvent: (UISetsEvent) -> Unit,
     onAuthorClick: (String) -> Unit,
     msg: ChatInfo,
     isUserMe: Boolean,
@@ -74,14 +78,16 @@ fun SelfMessageItem(
         if (lastMessageFromMe) Modifier.padding(top = 8.dp) else Modifier.padding(top = 16.dp)
     Row(modifier = spaceBetweenAuthors) {
         SelfMessage(
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f),
+            uiSetsEvent = uiSetsEvent,
+            uiSetsState = uiSetsState,
             msg = msg,
             isUserMe = isUserMe,
             isLastMessageByAuthor = lastMessageFromMe,
             authorClicked = onAuthorClick,
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .weight(1f),
-            onPlaying
+            onPlaying = onPlaying
         )
         if (!lastMessageFromMe) {
             // Avatar
@@ -106,18 +112,27 @@ fun SelfMessageItem(
 
 @Composable
 fun SelfMessage(
+    modifier: Modifier = Modifier,
+    uiSetsState: UISetsState,
+    uiSetsEvent: (UISetsEvent) -> Unit,
     msg: ChatInfo,
     isUserMe: Boolean,
     isLastMessageByAuthor: Boolean,
     authorClicked: (String) -> Unit,
-    modifier: Modifier = Modifier,
     onPlaying: () -> Unit
 ) {
     Column(modifier = modifier) {
         if (!isLastMessageByAuthor) {
             SelfTimestamp(msg)
         }
-        SelfChatItemBubble(msg, isUserMe, authorClicked = authorClicked, onPlaying)
+        SelfChatItemBubble(
+            uiSetsState = uiSetsState,
+            uiSetsEvent = uiSetsEvent,
+            chatMessage = msg,
+            isUserMe = isUserMe,
+            authorClicked = authorClicked,
+            onPlaying = onPlaying
+        )
 
 //        if (isLastMessageByAuthor) {
 //            // Last bubble before next author
@@ -134,7 +149,9 @@ private val SelfChatBubbleShape = RoundedCornerShape(10.dp, 4.dp, 10.dp, 10.dp)
 
 @Composable
 fun SelfChatItemBubble(
+    uiSetsState: UISetsState,
     chatMessage: ChatInfo,
+    uiSetsEvent: (UISetsEvent) -> Unit,
     isUserMe: Boolean,
     authorClicked: (String) -> Unit,
     onPlaying: () -> Unit
@@ -153,7 +170,12 @@ fun SelfChatItemBubble(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // 对聊天信息的操作
-                MessageFunction(onPlaying = onPlaying)
+                MessageFunction(
+                    isFuncOpened = uiSetsState.itemIndex == chatMessage.id,
+                    chatInfo = chatMessage,
+                    uiSetsEvent = uiSetsEvent,
+                    onPlaying = onPlaying
+                )
 
                 Row(
                     modifier = Modifier.background(

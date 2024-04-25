@@ -46,20 +46,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import kotlinx.coroutines.launch
 import top.topsea.streamplayer.R
+import top.topsea.streamplayer.data.state.UISetsState
 import top.topsea.streamplayer.data.table.ChatInfo
 import top.topsea.streamplayer.data.viewmodel.PlayerEvent
 import top.topsea.streamplayer.data.viewmodel.PlayerViewModel
+import top.topsea.streamplayer.data.viewmodel.UISetsEvent
+import top.topsea.streamplayer.data.viewmodel.UISetsViewModel
 
 const val ConversationTestTag = "ConversationTestTag"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatMessages(
+    modifier: Modifier = Modifier,
+    uiSetsState: UISetsState,
     chatMessages: List<ChatInfo>,
     playerViewModel: PlayerViewModel = hiltViewModel(),
     navigateToProfile: (String) -> Unit,
     scrollState: LazyListState,
-    modifier: Modifier = Modifier
+    uiSetsEvent: (UISetsEvent) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var playingMessage by remember { mutableLongStateOf(-1L) }
@@ -116,12 +121,15 @@ fun ChatMessages(
                 if (chatMessage.fromWho == "me") {
                     item {
                         SelfMessageItem(
+                            uiSetsState = uiSetsState,
+                            uiSetsEvent = uiSetsEvent,
                             onAuthorClick = { name -> navigateToProfile(name) },
                             msg = chatMessage,
                             isUserMe = true,
                             lastMessageFromMe = lastMessageFromMe,
                         ) {
-                            if (playingMessage == chatMessage.id!!) {
+                            uiSetsEvent(UISetsEvent.ClickItem(chatMessage.id!!))
+                            if (playingMessage == chatMessage.id) {
                                 playingMessage = chatMessage.id
                                 playerViewModel.onChatEvent(
                                     PlayerEvent.StopOrPlay
@@ -250,12 +258,12 @@ fun ClickableMessage(
 @Composable
 fun MessageFunction(
     modifier: Modifier = Modifier,
+    chatInfo: ChatInfo,
+    uiSetsEvent: (UISetsEvent) -> Unit,
+    isFuncOpened: Boolean,
     onPlaying: () -> Unit
 ) {
-    var isOpenFunc by remember {
-        mutableStateOf(false)
-    }
-    if (isOpenFunc) {
+    if (isFuncOpened) {
         Row(
             modifier = modifier,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -279,7 +287,7 @@ fun MessageFunction(
                 imageVector = Icons.Outlined.MoreVert,
                 contentDescription = "Open message func.",
                 Modifier.clickable {
-                    isOpenFunc = !isOpenFunc
+                    uiSetsEvent(UISetsEvent.ClickItem(chatInfo.id!!))
                 }
             )
         }
@@ -288,7 +296,7 @@ fun MessageFunction(
             imageVector = Icons.Outlined.MoreVert,
             contentDescription = "Open message func.",
             Modifier.clickable {
-                isOpenFunc = !isOpenFunc
+                uiSetsEvent(UISetsEvent.ClickItem(chatInfo.id!!))
             }
         )
     }
