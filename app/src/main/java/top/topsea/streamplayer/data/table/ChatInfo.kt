@@ -33,6 +33,7 @@ enum class MessageType{
 class ChatMessage(
     val type: MessageType,
     val content: String,
+    val voiceFile: String,
 )
 
 

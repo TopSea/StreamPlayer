@@ -72,14 +72,16 @@ fun MainScreen(
                 uiSetsState = uiSetsViewModel.uiSetsState,
                 navigateToProfile = navigateToProfile,
                 scrollState = scrollState,
-                uiSetsEvent = uiSetsViewModel::onUISetsEvent
+                uiSetsEvent = uiSetsViewModel::onUISetsEvent,
+                playerEvent = uiSetsViewModel::onPlayerEvent,
             )
             UserInput(
                 onMessageSent = { content ->
                                 // TODO 保存和发送信息
                     val newMessage = ChatMessage(
                         MessageType.TEXT,
-                        content
+                        content,
+                        ""
                     )
                     val newChat = ChatInfo(
                         id = null,

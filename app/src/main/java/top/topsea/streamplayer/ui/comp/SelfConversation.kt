@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 import top.topsea.streamplayer.R
 import top.topsea.streamplayer.data.state.UISetsState
 import top.topsea.streamplayer.data.table.ChatInfo
+import top.topsea.streamplayer.data.viewmodel.PlayerEvent
 import top.topsea.streamplayer.data.viewmodel.UISetsEvent
 import top.topsea.streamplayer.util.DateUtil
 
@@ -66,7 +67,7 @@ fun SelfMessageItem(
     msg: ChatInfo,
     isUserMe: Boolean,
     lastMessageFromMe: Boolean,
-    onPlaying: () -> Unit
+    playerEvent: (PlayerEvent) -> Unit
 ) {
     val borderColor = if (isUserMe) {
         MaterialTheme.colorScheme.primary
@@ -87,7 +88,7 @@ fun SelfMessageItem(
             isUserMe = isUserMe,
             isLastMessageByAuthor = lastMessageFromMe,
             authorClicked = onAuthorClick,
-            onPlaying = onPlaying
+            playerEvent = playerEvent
         )
         if (!lastMessageFromMe) {
             // Avatar
@@ -119,7 +120,7 @@ fun SelfMessage(
     isUserMe: Boolean,
     isLastMessageByAuthor: Boolean,
     authorClicked: (String) -> Unit,
-    onPlaying: () -> Unit
+    playerEvent: (PlayerEvent) -> Unit
 ) {
     Column(modifier = modifier) {
         if (!isLastMessageByAuthor) {
@@ -131,7 +132,7 @@ fun SelfMessage(
             chatMessage = msg,
             isUserMe = isUserMe,
             authorClicked = authorClicked,
-            onPlaying = onPlaying
+            playerEvent = playerEvent
         )
 
 //        if (isLastMessageByAuthor) {
@@ -154,7 +155,7 @@ fun SelfChatItemBubble(
     uiSetsEvent: (UISetsEvent) -> Unit,
     isUserMe: Boolean,
     authorClicked: (String) -> Unit,
-    onPlaying: () -> Unit
+    playerEvent: (PlayerEvent) -> Unit
 ) {
 
     val backgroundBubbleColor = if (isUserMe) {
@@ -171,10 +172,10 @@ fun SelfChatItemBubble(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // 对聊天信息的操作
                 MessageFunction(
-                    isFuncOpened = uiSetsState.itemIndex == chatMessage.id,
+                    uiSetsState = uiSetsState,
                     chatInfo = chatMessage,
                     uiSetsEvent = uiSetsEvent,
-                    onPlaying = onPlaying
+                    playerEvent = playerEvent
                 )
 
                 Row(

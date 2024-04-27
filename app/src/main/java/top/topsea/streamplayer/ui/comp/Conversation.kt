@@ -1,5 +1,6 @@
 package top.topsea.streamplayer.ui.comp
 
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,14 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -42,16 +41,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import kotlinx.coroutines.launch
 import top.topsea.streamplayer.R
 import top.topsea.streamplayer.data.state.UISetsState
 import top.topsea.streamplayer.data.table.ChatInfo
 import top.topsea.streamplayer.data.viewmodel.PlayerEvent
-import top.topsea.streamplayer.data.viewmodel.PlayerViewModel
 import top.topsea.streamplayer.data.viewmodel.UISetsEvent
-import top.topsea.streamplayer.data.viewmodel.UISetsViewModel
+import top.topsea.streamplayer.util.FileUtil
+import java.io.File
 
 const val ConversationTestTag = "ConversationTestTag"
 
@@ -61,23 +59,12 @@ fun ChatMessages(
     modifier: Modifier = Modifier,
     uiSetsState: UISetsState,
     chatMessages: List<ChatInfo>,
-    playerViewModel: PlayerViewModel = hiltViewModel(),
     navigateToProfile: (String) -> Unit,
     scrollState: LazyListState,
     uiSetsEvent: (UISetsEvent) -> Unit,
+    playerEvent: (PlayerEvent) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var playingMessage by remember { mutableLongStateOf(-1L) }
-
-    LaunchedEffect(key1 = playingMessage) {
-        if (playingMessage >= 0) {
-            playerViewModel.onChatEvent(
-                PlayerEvent.PlayItem(
-                    MediaItem.fromUri("http://music.163.com/song/media/outer/url?id=447925558.mp3")
-                )
-            )
-        }
-    }
 
     val state = rememberPullToRefreshState()
     if (state.isRefreshing) {
@@ -127,22 +114,8 @@ fun ChatMessages(
                             msg = chatMessage,
                             isUserMe = true,
                             lastMessageFromMe = lastMessageFromMe,
-                        ) {
-                            uiSetsEvent(UISetsEvent.ClickItem(chatMessage.id!!))
-                            if (playingMessage == chatMessage.id) {
-                                playingMessage = chatMessage.id
-                                playerViewModel.onChatEvent(
-                                    PlayerEvent.StopOrPlay
-                                )
-                            } else {
-                                playingMessage = chatMessage.id
-                                playerViewModel.onChatEvent(
-                                    PlayerEvent.PlayItem(
-                                        MediaItem.fromUri("http://music.163.com/song/media/outer/url?id=447925558.mp3")
-                                    )
-                                )
-                            }
-                        }
+                            playerEvent = playerEvent
+                        )
                     }
                 } else {
                     item {
@@ -260,21 +233,30 @@ fun MessageFunction(
     modifier: Modifier = Modifier,
     chatInfo: ChatInfo,
     uiSetsEvent: (UISetsEvent) -> Unit,
-    isFuncOpened: Boolean,
-    onPlaying: () -> Unit
+    uiSetsState: UISetsState,
+    playerEvent: (PlayerEvent) -> Unit
 ) {
-    if (isFuncOpened) {
+    val context = LocalContext.current
+    if (uiSetsState.itemIndex == chatInfo.id) {
         Row(
             modifier = modifier,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.chat_func_mic),
-                contentDescription = "Delete message.",
-                Modifier.clickable {
-                    onPlaying()
-                }
-            )
+            if (chatInfo.messageContent.voiceFile.isNotEmpty()) {
+                Icon(
+                    painter = painterResource(id = R.drawable.chat_func_mic),
+                    contentDescription = "Play message.",
+                    Modifier.clickable {
+                        val voiceFile = FileUtil.getVoiceFile(context, chatInfo.messageContent.voiceFile)
+                        playerEvent(
+                            PlayerEvent.PlayItem(
+                                itemIndex = chatInfo.id,
+                                MediaItem.fromUri(Uri.fromFile(File(voiceFile)))
+                            )
+                        )
+                    }
+                )
+            }
             Icon(
                 painter = painterResource(id = R.drawable.chat_func_download),
                 contentDescription = "Delete message."
@@ -287,7 +269,7 @@ fun MessageFunction(
                 imageVector = Icons.Outlined.MoreVert,
                 contentDescription = "Open message func.",
                 Modifier.clickable {
-                    uiSetsEvent(UISetsEvent.ClickItem(chatInfo.id!!))
+                    uiSetsEvent(UISetsEvent.ClickItem(chatInfo.id))
                 }
             )
         }
