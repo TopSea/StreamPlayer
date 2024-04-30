@@ -1,5 +1,6 @@
 package top.topsea.streamplayer.ui.screen
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import top.topsea.streamplayer.data.table.MessageType
 import top.topsea.streamplayer.data.viewmodel.ChatEvent
 import top.topsea.streamplayer.data.viewmodel.ChatInfoViewModel
 import top.topsea.streamplayer.data.viewmodel.UISetsViewModel
+import top.topsea.streamplayer.tauri.TestActivity
 import top.topsea.streamplayer.ui.comp.ChatMessages
 import top.topsea.streamplayer.ui.comp.UserInput
 import java.sql.Date
@@ -65,9 +67,12 @@ fun MainScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(paddingValues)) {
+                .padding(paddingValues)
+        ) {
             ChatMessages(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 chatMessages = chatUIState.chats,
                 uiSetsState = uiSetsViewModel.uiSetsState,
                 navigateToProfile = navigateToProfile,
@@ -77,7 +82,7 @@ fun MainScreen(
             )
             UserInput(
                 onMessageSent = { content ->
-                                // TODO 保存和发送信息
+                    // TODO 保存和发送信息
                     val newMessage = ChatMessage(
                         MessageType.TEXT,
                         content,
@@ -90,9 +95,11 @@ fun MainScreen(
                         messageContent = newMessage,
                         sendTime = Date(System.currentTimeMillis())
                     )
-                    chatInfoViewModel.onChatEvent(ChatEvent.AddChat(
-                        newChat
-                    ))
+                    chatInfoViewModel.onChatEvent(
+                        ChatEvent.AddChat(
+                            newChat
+                        )
+                    )
                 },
                 resetScroll = {
                     scope.launch {
@@ -140,6 +147,8 @@ fun MainTopBar(
                 .size(32.dp)
                 .align(Alignment.CenterEnd)
                 .clickable {
+//                    val intent = Intent(context, TestActivity::class.java)
+//                    context.startActivity(intent)
                     navController.navigate("settings")
                 },
             tint = Color.White

@@ -20,7 +20,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import top.topsea.streamplayer.data.viewmodel.ChatInfoViewModel
+import top.topsea.streamplayer.data.viewmodel.UISetsViewModel
 import top.topsea.streamplayer.ui.screen.MainScreen
+import top.topsea.streamplayer.ui.screen.SettingsScreen
 import top.topsea.streamplayer.ui.theme.StreamPlayerTheme
 
 @AndroidEntryPoint
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
 
                 val context = LocalContext.current
                 val viewModel:ChatInfoViewModel = hiltViewModel()
+                val uiViewModel:UISetsViewModel = hiltViewModel()
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("settings") {
-                            // TODO 设置页面
+                            SettingsScreen(uiSetsState = uiViewModel.uiSetsState)
                         }
                     }
                 }
